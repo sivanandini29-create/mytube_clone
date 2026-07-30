@@ -1,0 +1,27 @@
+mutation SeedDatabase @transaction @auth(level: USER) {
+  user_insertMany(data: [
+    { id: "00000000-0000-0000-0000-000000000001", displayName: "Alice", email: "alice@example.com" },
+    { id: "00000000-0000-0000-0000-000000000002", displayName: "Bob", email: "bob@example.com" },
+    { id: "00000000-0000-0000-0000-000000000003", displayName: "Charlie", email: "charlie@example.com" }
+  ])
+  video_insertMany(data: [
+    { id: "10000000-0000-0000-0000-000000000001", title: "Cooking 101", videoUrl: "url1", uploadDate: "2023-01-01T12:00:00Z", authorId: "00000000-0000-0000-0000-000000000001" },
+    { id: "10000000-0000-0000-0000-000000000002", title: "Travel VLOG", videoUrl: "url2", uploadDate: "2023-02-01T12:00:00Z", authorId: "00000000-0000-0000-0000-000000000002" },
+    { id: "10000000-0000-0000-0000-000000000003", title: "Tech Talk", videoUrl: "url3", uploadDate: "2023-03-01T12:00:00Z", authorId: "00000000-0000-0000-0000-000000000003" }
+  ])
+  comment_insertMany(data: [
+    { content: "Great video!", createdAt: "2023-01-02T10:00:00Z", authorId: "00000000-0000-0000-0000-000000000002", videoId: "10000000-0000-0000-0000-000000000001" },
+    { content: "Very helpful", createdAt: "2023-01-03T10:00:00Z", authorId: "00000000-0000-0000-0000-000000000003", videoId: "10000000-0000-0000-0000-000000000001" },
+    { content: "I love this!", createdAt: "2023-02-05T10:00:00Z", authorId: "00000000-0000-0000-0000-000000000001", videoId: "10000000-0000-0000-0000-000000000002" }
+  ])
+  like_insertMany(data: [
+    { createdAt: "2023-01-02T11:00:00Z", userId: "00000000-0000-0000-0000-000000000002", videoId: "10000000-0000-0000-0000-000000000001" },
+    { createdAt: "2023-02-05T11:00:00Z", userId: "00000000-0000-0000-0000-000000000001", videoId: "10000000-0000-0000-0000-000000000002" },
+    { createdAt: "2023-03-10T11:00:00Z", userId: "00000000-0000-0000-0000-000000000003", videoId: "10000000-0000-0000-0000-000000000003" }
+  ])
+  userSubscription_insertMany(data: [
+    { createdAt: "2023-01-01T09:00:00Z", subscriberId: "00000000-0000-0000-0000-000000000002", creatorId: "00000000-0000-0000-0000-000000000001" },
+    { createdAt: "2023-02-01T09:00:00Z", subscriberId: "00000000-0000-0000-0000-000000000003", creatorId: "00000000-0000-0000-0000-000000000002" },
+    { createdAt: "2023-03-01T09:00:00Z", subscriberId: "00000000-0000-0000-0000-000000000001", creatorId: "00000000-0000-0000-0000-000000000003" }
+  ])
+}

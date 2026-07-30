@@ -1,0 +1,34 @@
+type User @table {
+  displayName: String!
+  email: String!
+  avatarUrl: String
+  bio: String
+}
+
+type Video @table {
+  title: String!
+  videoUrl: String!
+  uploadDate: Timestamp!
+  description: String
+  thumbnailUrl: String
+  author: User!
+}
+
+type Comment @table {
+  content: String!
+  createdAt: Timestamp!
+  author: User!
+  video: Video!
+}
+
+type Like @table {
+  createdAt: Timestamp!
+  user: User!
+  video: Video!
+}
+
+type UserSubscription @table {
+  createdAt: Timestamp!
+  subscriber: User!
+  creator: User!
+}

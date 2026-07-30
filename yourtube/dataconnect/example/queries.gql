@@ -1,0 +1,93 @@
+mutation CreateUser @auth(level: USER) {
+  user_insert(data: {id_expr: "auth.uid", displayName: "New User", email: "user@example.com"})
+}
+
+mutation UpdateUser @auth(level: USER) {
+  user_update(key: {id_expr: "auth.uid"}, data: {displayName: "Updated Name"})
+}
+
+mutation DeleteUser @auth(level: USER) {
+  user_delete(key: {id_expr: "auth.uid"})
+}
+
+query GetCurrentUser @auth(level: USER) {
+  user(key: {id_expr: "auth.uid"}) { id displayName email }
+}
+
+query ListUsers @auth(level: PUBLIC, insecureReason: "Public profile directory") {
+  users { id displayName }
+}
+
+mutation CreateVideo @auth(level: USER) {
+  video_insert(data: {
+    title: "My First Video",
+    videoUrl: "https://example.com/video.mp4",
+    uploadDate_time: {now: true},
+    author: {id_expr: "auth.uid"}
+  })
+}
+
+mutation UpdateVideo @auth(level: USER) {
+  video_update(key: {id: "00000000-0000-0000-0000-000000000000"}, data: {title: "Better Title"})
+}
+
+mutation DeleteVideo @auth(level: USER) {
+  video_delete(key: {id: "00000000-0000-0000-0000-000000000000"})
+}
+
+query GetVideo @auth(level: PUBLIC, insecureReason: "Videos are public") {
+  video(id: "00000000-0000-0000-0000-000000000000") { title videoUrl }
+}
+
+query ListVideos @auth(level: PUBLIC, insecureReason: "Public video feed") {
+  videos { id title }
+}
+
+mutation CreateComment @auth(level: USER) {
+  comment_insert(data: {
+    content: "Great video!",
+    createdAt_time: {now: true},
+    author: {id_expr: "auth.uid"},
+    video: {id: "00000000-0000-0000-0000-000000000000"}
+  })
+}
+
+mutation DeleteComment @auth(level: USER) {
+  comment_delete(key: {id: "00000000-0000-0000-0000-000000000000"})
+}
+
+query ListComments @auth(level: PUBLIC, insecureReason: "Comments are public") {
+  comments(where: {videoId: {eq: "00000000-0000-0000-0000-000000000000"}}) { content author { displayName } }
+}
+
+mutation LikeVideo @auth(level: USER) {
+  like_insert(data: {
+    createdAt_time: {now: true},
+    user: {id_expr: "auth.uid"},
+    video: {id: "00000000-0000-0000-0000-000000000000"}
+  })
+}
+
+mutation UnlikeVideo @auth(level: USER) {
+  like_delete(first: {where: {userId: {eq_expr: "auth.uid"}, videoId: {eq: "00000000-0000-0000-0000-000000000000"}}})
+}
+
+query GetLikes @auth(level: USER) {
+  likes(where: {userId: {eq_expr: "auth.uid"}}) { video { title } }
+}
+
+mutation Subscribe @auth(level: USER) {
+  userSubscription_insert(data: {
+    createdAt_time: {now: true},
+    subscriber: {id_expr: "auth.uid"},
+    creator: {id: "00000000-0000-0000-0000-000000000000"}
+  })
+}
+
+mutation Unsubscribe @auth(level: USER) {
+  userSubscription_delete(first: {where: {subscriberId: {eq_expr: "auth.uid"}, creatorId: {eq: "00000000-0000-0000-0000-000000000000"}}})
+}
+
+query ListSubscriptions @auth(level: USER) {
+  userSubscriptions(where: {subscriberId: {eq_expr: "auth.uid"}}) { creator { displayName } }
+}
