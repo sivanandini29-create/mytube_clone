@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { UserProvider } from "../lib/AuthContext";
 import "../styles/globals.css";
 
-function AppContent({ Component, pageProps }: AppProps) {
+function AppContent({ Component, pageProps, router }: AppProps) {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
 
   useEffect(() => {
@@ -64,10 +64,10 @@ function AppContent({ Component, pageProps }: AppProps) {
   );
 }
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps, router }: AppProps) {
   return (
     <UserProvider>
-      <AppContent Component={Component} pageProps={pageProps} />
+      <AppContent Component={Component} pageProps={pageProps} router={router} />
     </UserProvider>
   );
 }
