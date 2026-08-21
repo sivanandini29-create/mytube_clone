@@ -24,6 +24,7 @@ const WatchParty = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [connected, setConnected] = useState(false);
   const [participantCount, setParticipantCount] = useState(0);
+  const [showParticipants, setShowParticipants] = useState(false);
   const [cameraOn, setCameraOn] = useState(false);
   const [micOn, setMicOn] = useState(false);
   const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -57,6 +58,48 @@ const WatchParty = () => {
     } catch (error) {
       console.error("Camera/Mic permission error:", error);
     }
+  };
+
+  const toggleCamera = () => {
+    const videoTrack = localStreamRef.current?.getVideoTracks()[0];
+
+    if (videoTrack) {
+      videoTrack.enabled = !videoTrack.enabled;
+      setCameraOn(videoTrack.enabled);
+    }
+  };
+
+  const toggleMic = () => {
+    const audioTrack = localStreamRef.current?.getAudioTracks()[0];
+
+    if (audioTrack) {
+      audioTrack.enabled = !audioTrack.enabled;
+      setMicOn(audioTrack.enabled);
+    }
+  };
+
+  const leaveCall = () => {
+    // Stop local camera/mic tracks
+    localStreamRef.current?.getTracks().forEach((track) => track.stop());
+    localStreamRef.current = null;
+
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+
+    // Close peer connection
+    peerConnectionRef.current?.close();
+    peerConnectionRef.current = null;
+    remoteSocketIdRef.current = null;
+
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
+
+    setCameraOn(false);
+    setMicOn(false);
+
+    console.log("Left the call");
   };
 
   const currentUser = {
@@ -345,6 +388,7 @@ const WatchParty = () => {
   return (
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-6xl mx-auto">
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">Watch Party</h1>
@@ -357,13 +401,17 @@ const WatchParty = () => {
               {connected ? "● Connected" : "● Disconnected"}
             </p>
 
-            <p className="text-gray-400">
+            <button
+              onClick={() => setShowParticipants((prev) => !prev)}
+              className="text-gray-400 hover:text-white transition"
+            >
               👥 {participantCount} participant
               {participantCount !== 1 ? "s" : ""}
-            </p>
+            </button>
           </div>
         </div>
 
+        {/* INVITE SECTION */}
         <div className="bg-gray-900 rounded-xl p-4 mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-sm text-gray-400">Room Code</p>
@@ -380,7 +428,64 @@ const WatchParty = () => {
           </button>
         </div>
 
+        {showParticipants && (
+          <div className="mb-5 bg-gray-900 rounded-xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">👥 Participants</h2>
+
+              <button
+                onClick={() => setShowParticipants(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between bg-gray-800 rounded-lg p-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center font-bold">
+                    G
+                  </div>
+
+                  <div>
+                    <p className="font-medium">Guest</p>
+
+                    <p className="text-xs text-green-400">● You</p>
+                  </div>
+                </div>
+
+                <span className="text-green-400 text-sm">Online</span>
+              </div>
+
+              {participantCount > 1 &&
+                Array.from({ length: participantCount - 1 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-gray-800 rounded-lg p-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold">
+                        U
+                      </div>
+
+                      <div>
+                        <p className="font-medium">User {index + 2}</p>
+
+                        <p className="text-xs text-gray-400">Participant</p>
+                      </div>
+                    </div>
+
+                    <span className="text-green-400 text-sm">Online</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* VIDEO + CHAT */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* VIDEO SECTION */}
           <div className="lg:col-span-2">
             <div className="bg-gray-900 rounded-xl overflow-hidden">
               <video
@@ -407,6 +512,7 @@ const WatchParty = () => {
                 />
               </div>
 
+              {/* Remote video */}
               <div className="bg-black rounded-lg overflow-hidden mt-3">
                 <video
                   ref={remoteVideoRef}
@@ -422,6 +528,39 @@ const WatchParty = () => {
               >
                 {cameraOn ? "Camera Started" : "Start Camera"}
               </button>
+
+              {cameraOn && (
+                <div className="flex flex-wrap gap-3 mt-3">
+                  <button
+                    onClick={toggleCamera}
+                    className={`px-4 py-2 rounded-lg font-medium ${
+                      cameraOn
+                        ? "bg-gray-700 hover:bg-gray-600"
+                        : "bg-red-600 hover:bg-red-700"
+                    }`}
+                  >
+                    {cameraOn ? "📷 Camera Off" : "📷 Camera On"}
+                  </button>
+
+                  <button
+                    onClick={toggleMic}
+                    className={`px-4 py-2 rounded-lg font-medium ${
+                      micOn
+                        ? "bg-gray-700 hover:bg-gray-600"
+                        : "bg-red-600 hover:bg-red-700"
+                    }`}
+                  >
+                    {micOn ? "🎤 Mute" : "🎤 Unmute"}
+                  </button>
+
+                  <button
+                    onClick={leaveCall}
+                    className="px-4 py-2 rounded-lg font-medium bg-red-700 hover:bg-red-800"
+                  >
+                    🚪 Leave Call
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="mt-5 bg-gray-900 rounded-xl p-5">
@@ -436,7 +575,9 @@ const WatchParty = () => {
             </div>
           </div>
 
+          {/* CHAT SECTION */}
           <div className="bg-gray-900 rounded-xl flex flex-col h-[500px]">
+            {/* CHAT HEADER */}
             <div className="p-4 border-b border-gray-700">
               <h2 className="text-lg font-semibold">💬 Party Chat</h2>
 
@@ -445,6 +586,7 @@ const WatchParty = () => {
               </p>
             </div>
 
+            {/* MESSAGES */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.length === 0 ? (
                 <div className="h-full flex items-center justify-center">
@@ -468,6 +610,7 @@ const WatchParty = () => {
               )}
             </div>
 
+            {/* CHAT INPUT */}
             <div className="p-3 border-t border-gray-700">
               <div className="flex gap-2">
                 <input
