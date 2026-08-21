@@ -37,18 +37,18 @@ const VideoInfo = ({ video }: any) => {
 
   useEffect(() => {
     const handleviews = async () => {
-  try {
-    if (user) {
-      return await axiosInstance.post(`/history/${video._id}`, {
-        userId: user?._id,
-      });
-    } else {
-      return await axiosInstance.post(`/history/views/${video?._id}`);
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
+      try {
+        if (user) {
+          return await axiosInstance.post(`/history/${video._id}`, {
+            userId: user?._id,
+          });
+        } else {
+          return await axiosInstance.post(`/history/views/${video?._id}`);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
   }, [user]);
   const handleLike = async () => {
     if (!user) return;
@@ -108,6 +108,22 @@ const VideoInfo = ({ video }: any) => {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!user) return;
+
+    try {
+      console.log(user._id);
+      console.log(user._id.length);
+      const res = await axiosInstance.post(`/download/${video._id}`, {
+        userId: user._id,
+      });
+
+      alert(res.data.message);
+    } catch (error: any) {
+      alert(error.response?.data?.message || "something went wrong");
     }
   };
   return (
@@ -178,6 +194,7 @@ const VideoInfo = ({ video }: any) => {
             variant="ghost"
             size="sm"
             className="bg-gray-100 rounded-full"
+            onClick={handleDownload}
           >
             <Download className="w-5 h-5 mr-2" />
             Download

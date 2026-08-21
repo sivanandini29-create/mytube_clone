@@ -18,15 +18,15 @@ export default function VideoCard({ video }: any) {
           </div>
         </div>
         <div className="flex gap-3">
-          <Avatar className="w-9 h-9 flex-shrink-0">
-            <AvatarFallback>{video?.videochanel[0]}</AvatarFallback>
+          <Avatar className="w-9 h-9 flex-shrink-0 bg-gray-200 dark:bg-gray-700">
+            <AvatarFallback className="text-black dark:text-white">{video?.videochanel[0]} </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-sm line-clamp-2 group-hover:text-blue-600">
+            <h3 className="font-medium text-sm line-clamp-2 text-black dark:text-white group-hover:text-blue-600">
               {video?.videotitle}
             </h3>
-            <p className="text-sm text-gray-600 mt-1">{video?.videochanel}</p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{video?.videochanel}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               {video?.views.toLocaleString()} views •{" "}
               {formatDistanceToNow(new Date(video?.createdAt))} ago
             </p>

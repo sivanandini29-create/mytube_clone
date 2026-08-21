@@ -12,11 +12,14 @@ interface Comment {
   commentbody: string;
   usercommented: string;
   commentedon: string;
+  likes: string[];
+  dislikes: string[];
 }
 const Comments = ({ videoId }: any) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const { user } = useUser();
@@ -60,8 +63,9 @@ const Comments = ({ videoId }: any) => {
     if (!user || !newComment.trim()) return;
 
     setIsSubmitting(true);
-    try{
-      const res = await axiosInstance.post("/comment/postcomment", {
+    setErrorMessage("");
+    try {
+      const res = await axiosInstance.post(`/comment/postcomment`, {
         videoid: videoId,
         userid: user._id,
         commentbody: newComment,
@@ -75,12 +79,18 @@ const Comments = ({ videoId }: any) => {
           commentbody: newComment,
           usercommented: user.name || "Anonymous",
           commentedon: new Date().toISOString(),
+          likes: [],
+          dislikes: [],
         };
         setComments([newCommentObj, ...comments]);
       }
       setNewComment("");
-    } catch (error) {
-      console.error("Error adding comment:", error);
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("something went worng");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -96,13 +106,13 @@ const Comments = ({ videoId }: any) => {
     try {
       const res = await axiosInstance.post(
         `/comment/editcomment/${editingCommentId}`,
-        { commentbody: editText }
+        { commentbody: editText },
       );
       if (res.data) {
         setComments((prev) =>
           prev.map((c) =>
-            c._id === editingCommentId ? { ...c, commentbody: editText } : c
-          )
+            c._id === editingCommentId ? { ...c, commentbody: editText } : c,
+          ),
         );
         setEditingCommentId(null);
         setEditText("");
@@ -122,6 +132,55 @@ const Comments = ({ videoId }: any) => {
       console.log(error);
     }
   };
+  const handleLike = async (commentId: string) => {
+    if (!user) return;
+    try {
+      const res = await axiosInstance.post(`/comment/like/${commentId}`, {
+        userId: user._id,
+      });
+
+      if (res.status === 200) {
+        loadComments();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleReport = async (commentId: string) => {
+    if (!user) return;
+
+    try {
+      const res = await axiosInstance.post(`/comment/report/${commentId}`, {
+        userId: user._id,
+        reason: "Inappropriate content",
+      });
+
+      alert(res.data.message);
+      loadComments();
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("Something went wrong");
+      }
+    }
+  };
+
+  const handleDislike = async (commentId: string) => {
+    if (!user) return;
+    try {
+      const res = await axiosInstance.post(`/comment/dislike/${commentId}`, {
+        userId: user._id,
+      });
+      if (res.status === 200) {
+        loadComments();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">{comments.length} Comments</h2>
@@ -139,6 +198,11 @@ const Comments = ({ videoId }: any) => {
               onChange={(e: any) => setNewComment(e.target.value)}
               className="min-h-[80px] resize-none border-0 border-b-2 rounded-none focus-visible:ring-0"
             />
+
+            {errorMessage && (
+              <p className="text-red-500 text-sm">{errorMessage}</p>
+            )}
+
             <div className="flex gap-2 justify-end">
               <Button
                 variant="ghost"
@@ -205,13 +269,39 @@ const Comments = ({ videoId }: any) => {
                 ) : (
                   <>
                     <p className="text-sm">{comment.commentbody}</p>
-                    {comment.userid === user?._id && (
+
+                    <div className="flex items-center gap-4 mt-2 text-sm">
+                      <button
+                        onClick={() => handleLike(comment._id)}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Like ({comment.likes.length || 0})
+                      </button>
+                      <button
+                        onClick={() => handleDislike(comment._id)}
+                        className="text-red-600 hover:underline"
+                      >
+                        Dislike ({comment.dislikes?.length || 0})
+                      </button>
+                    </div>
+
+                    {comment.userid === user?._id ? (
                       <div className="flex gap-2 mt-2 text-sm text-gray-500">
                         <button onClick={() => handleEdit(comment)}>
                           Edit
                         </button>
+
                         <button onClick={() => handleDelete(comment._id)}>
                           Delete
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2 mt-2 text-sm text-gray-500">
+                        <button
+                          onClick={() => handleReport(comment._id)}
+                          className="text-red-600 hover:underline"
+                        >
+                          Report
                         </button>
                       </div>
                     )}
