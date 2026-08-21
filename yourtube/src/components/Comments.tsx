@@ -60,7 +60,7 @@ const Comments = ({ videoId }: any) => {
     if (!user || !newComment.trim()) return;
 
     setIsSubmitting(true);
-    try {
+    try{
       const res = await axiosInstance.post("/comment/postcomment", {
         videoid: videoId,
         userid: user._id,

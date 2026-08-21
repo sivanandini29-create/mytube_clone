@@ -9,7 +9,7 @@ const reportschema = mongoose.Schema({
     type: String,
     default: "inappropriate content",
   },
-  reportedAt:{
+  reportedAt: {
     type: Date,
     default: Date.now,
   },
@@ -60,20 +60,12 @@ const commentschema = mongoose.Schema(
       },
     ],
 
-    report:[reportSchema],
+    reports: [reportschema],
 
-    isflagged:{
-      type: Date,
+    isflagged: {
+      type: Boolean,
       default: false,
     },
-    
-    commendtedon:{
-      type: Date,
-      defalt:Date.now,
-    },
-
-
-
 
     commentedon: {
       type: Date,
