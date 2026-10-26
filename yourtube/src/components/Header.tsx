@@ -88,7 +88,7 @@ const Header = () => {
             type="search"
             placeholder="Search"
             value={searchQuery}
-            onKeyPress={handleKeypress}
+            onKeyDown={handleKeypress}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="rounded-l-full border-r-0 focus-visible:ring-0 bg-white dark:bg-neutral-900 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 border-gray-300 dark:border-neutral-700"
           />

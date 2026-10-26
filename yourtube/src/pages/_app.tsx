@@ -11,6 +11,7 @@ function AppContent({ Component, pageProps, router }: AppProps) {
 
   return (
     <div
+      suppressHydrationWarning
       className={
         theme === "dark"
           ? "dark min-h-screen bg-black text-white"
