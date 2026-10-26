@@ -80,8 +80,8 @@ export default function LikedVideosContent() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <p className="text-sm text-gray-600">{likedVideos.length} videos</p>
-        <Button className="flex items-center gap-2">
+        <p className="text-sm text-gray-600 dark:text-gray-400">{likedVideos.length} videos</p>
+        <Button className="flex items-center gap-2 bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200">
           <Play className="w-4 h-4" />
           Play all
         </Button>
@@ -91,9 +91,9 @@ export default function LikedVideosContent() {
         {likedVideos.map((item) => (
           <div key={item._id} className="flex gap-4 group">
             <Link href={`/watch/${item.videoid._id}`} className="flex-shrink-0">
-              <div className="relative w-40 aspect-video bg-gray-100 rounded overflow-hidden">
+              <div className="relative w-40 aspect-video bg-gray-100 dark:bg-neutral-800 rounded overflow-hidden">
                 <video
-                  src={`${process.env.BACKEND_URL}/${item.videoid?.filepath}`}
+                  src={`${process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/${item.videoid?.filepath}`}
                   className="object-cover group-hover:scale-105 transition-transform duration-200"
                 />
               </div>
@@ -101,18 +101,18 @@ export default function LikedVideosContent() {
 
             <div className="flex-1 min-w-0">
               <Link href={`/watch/${item.videoid._id}`}>
-                <h3 className="font-medium text-sm line-clamp-2 group-hover:text-blue-600 mb-1">
+                <h3 className="font-semibold text-sm line-clamp-2 text-black dark:text-white group-hover:text-blue-600 mb-1">
                   {item.videoid.videotitle}
                 </h3>
               </Link>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 {item.videoid.videochanel}
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 {item.videoid.views.toLocaleString()} views •{" "}
                 {formatDistanceToNow(new Date(item.videoid.createdAt))} ago
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Liked {formatDistanceToNow(new Date(item.createdAt))} ago
               </p>
             </div>

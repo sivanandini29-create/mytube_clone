@@ -60,9 +60,13 @@ const Header = () => {
     setOtpLoading(false);
   };
   return (
-    <header className="flex items-center justify-between px-4 py-2 bg-black border-b">
+    <header className="flex items-center justify-between px-4 py-2 bg-white dark:bg-black text-black dark:text-white border-b border-gray-200 dark:border-neutral-800">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+        >
           <Menu className="w-6 h-6" />
         </Button>
         <Link href="/" className="flex items-center gap-1">
@@ -71,8 +75,8 @@ const Header = () => {
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
             </svg>
           </div>
-          <span className="text-xl font-medium text-white">myTube</span>
-          <span className="text-xs text-gray-400 ml-1">IN</span>
+          <span className="text-xl font-semibold text-black dark:text-white">myTube</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">IN</span>
         </Link>
       </div>
       <form
@@ -86,26 +90,38 @@ const Header = () => {
             value={searchQuery}
             onKeyPress={handleKeypress}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="rounded-l-full border-r-0 focus-visible:ring-0 bg-gray-900 text-white placeholder:text-gray-400"
+            className="rounded-l-full border-r-0 focus-visible:ring-0 bg-white dark:bg-neutral-900 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 border-gray-300 dark:border-neutral-700"
           />
           <Button
             type="submit"
-            className="rounded-r-full px-6 bg-gray-900 hover:bg-gray-800 text-white border border-l-0"
+            className="rounded-r-full px-6 bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-black dark:text-white border border-l-0 border-gray-300 dark:border-neutral-700 cursor-pointer"
           >
             <Search className="w-5 h-5" />
           </Button>
         </div>
-        <Button variant="ghost" size="icon" className="rounded-full text-white">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+        >
           <Mic className="w-5 h-5" />
         </Button>
       </form>
       <div className="flex items-center gap-2">
         {user ? (
           <>
-            <Button variant="ghost" size="icon" className="text-white">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+            >
               <VideoIcon className="w-6 h-6" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-white">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+            >
               <Bell className="w-6 h-6" />
             </Button>
             <DropdownMenu>
@@ -156,16 +172,15 @@ const Header = () => {
             </DropdownMenu>
           </>
         ) : (
-          <>
+          <Link href="/login">
             <Button
-              className="flex items-center gap-2"
-              onClick={handlegooglesignin}
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white rounded-full px-4"
             >
               <User className="w-4 h-4" />
               Sign in
             </Button>
-          </>
-        )}{" "}
+          </Link>
+        )}
       </div>
       {otpRequired && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70">

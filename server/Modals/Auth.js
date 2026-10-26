@@ -6,8 +6,18 @@ const userschema = mongoose.Schema({
     required: true,
   },
 
+  username: {
+    type: String,
+    default: null,
+  },
+
   name: {
     type: String,
+  },
+
+  password: {
+    type: String,
+    default: null,
   },
 
   channelname: {

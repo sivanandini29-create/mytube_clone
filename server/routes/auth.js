@@ -1,8 +1,10 @@
 import express from "express";
-import { login, updateprofile,verifyOTP } from "../controllers/auth.js";
+import { login, signup, updateprofile, verifyOTP, sendLoginOtp } from "../controllers/auth.js";
 const routes = express.Router();
 
+routes.post("/signup", signup);
 routes.post("/login", login);
-routes.post("/verify-otp",verifyOTP);
+routes.post("/send-login-otp", sendLoginOtp);
+routes.post("/verify-otp", verifyOTP);
 routes.patch("/update/:id", updateprofile);
 export default routes;

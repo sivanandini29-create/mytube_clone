@@ -69,39 +69,39 @@ const Subscription = () => {
         strategy="afterInteractive"
       />
 
-      <div className="py-10">
+      <div className="py-10 text-black dark:text-white">
         <h1 className="text-3xl font-bold text-center">Choose Your Plan</h1>
 
-        <p className="text-center text-gray-500 mt-2">
+        <p className="text-center text-gray-500 dark:text-gray-400 mt-2">
           Upgrade your plan to unlock premium features.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10 px-10">
           {/* Free */}
-          <div className="border rounded-lg p-6 shadow-md text-center">
+          <div className="border border-gray-200 dark:border-neutral-800 rounded-xl p-6 shadow-sm text-center bg-white dark:bg-neutral-900">
             <h2 className="text-2xl font-bold">Free</h2>
 
-            <p className="mt-2">₹0 / Month</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">₹0 / Month</p>
 
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <li>Limited Premium Videos</li>
               <li>Basic Features</li>
               <li>No Downloads</li>
               <li>Ads Enabled</li>
             </ul>
 
-            <button className="mt-6 bg-gray-500 text-white px-4 py-2 rounded">
+            <button className="mt-6 bg-gray-500 text-white px-4 py-2 rounded-lg font-medium cursor-not-allowed opacity-80">
               Current Plan
             </button>
           </div>
 
           {/* Bronze */}
-          <div className="border rounded-lg p-6 shadow-md text-center">
+          <div className="border border-gray-200 dark:border-neutral-800 rounded-xl p-6 shadow-sm text-center bg-white dark:bg-neutral-900">
             <h2 className="text-2xl font-bold text-yellow-600">Bronze</h2>
 
-            <p className="mt-2">₹99 / Month</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">₹99 / Month</p>
 
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <li>Premium Videos</li>
               <li>Longer Watch Time</li>
               <li>Downloads</li>
@@ -110,19 +110,19 @@ const Subscription = () => {
 
             <button
               onClick={() => handlePayment(99, "Bronze")}
-              className="mt-6 bg-yellow-600 text-white px-4 py-2 rounded"
+              className="mt-6 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-medium cursor-pointer"
             >
               Upgrade
             </button>
           </div>
 
           {/* Silver */}
-          <div className="border rounded-lg p-6 shadow-md text-center">
-            <h2 className="text-2xl font-bold text-gray-500">Silver</h2>
+          <div className="border border-gray-200 dark:border-neutral-800 rounded-xl p-6 shadow-sm text-center bg-white dark:bg-neutral-900">
+            <h2 className="text-2xl font-bold text-slate-500 dark:text-slate-300">Silver</h2>
 
-            <p className="mt-2">₹199 / Month</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">₹199 / Month</p>
 
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <li>Premium Videos</li>
               <li>Longer Watch Time</li>
               <li>Downloads</li>
@@ -131,19 +131,19 @@ const Subscription = () => {
 
             <button
               onClick={() => handlePayment(199, "Silver")}
-              className="mt-6 bg-gray-500 text-white px-4 py-2 rounded"
+              className="mt-6 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium cursor-pointer"
             >
               Upgrade
             </button>
           </div>
 
           {/* Gold */}
-          <div className="border rounded-lg p-6 shadow-md text-center">
+          <div className="border border-gray-200 dark:border-neutral-800 rounded-xl p-6 shadow-sm text-center bg-white dark:bg-neutral-900">
             <h2 className="text-2xl font-bold text-orange-500">Gold</h2>
 
-            <p className="mt-2">₹299 / Month</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">₹299 / Month</p>
 
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-300">
               <li>Premium Videos</li>
               <li>Unlimited Watch Time</li>
               <li>Video Downloads</li>
@@ -152,7 +152,7 @@ const Subscription = () => {
 
             <button
               onClick={() => handlePayment(299, "Gold")}
-              className="mt-6 bg-orange-500 text-white px-4 py-2 rounded"
+              className="mt-6 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium cursor-pointer"
             >
               Upgrade
             </button>

@@ -1,6 +1,6 @@
 import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { useState, createContext, useEffect, useContext } from "react";
-import { provider, auth } from "./firebase";
+import { provider, githubProvider, auth } from "./firebase";
 import axiosInstance from "./axiosinstance";
 
 const UserContext = createContext();
@@ -10,6 +10,7 @@ export const UserProvider = ({ children }) => {
   const [theme, setTheme] = useState("dark");
   const [otpRequired, setOtpRequired] = useState(false);
   const [otpUserId, setOtpUserId] = useState(null);
+  const [otpEmailHint, setOtpEmailHint] = useState("");
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
@@ -25,6 +26,12 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light" || savedTheme === "dark") {
+      setTheme(savedTheme);
+      return;
+    }
+
     const currentHour = new Date().toLocaleString("en-US", {
       timeZone: "Asia/Kolkata",
       hour: "numeric",
@@ -51,6 +58,7 @@ export const UserProvider = ({ children }) => {
     setUser(null);
     setOtpRequired(false);
     setOtpUserId(null);
+    setOtpEmailHint("");
 
     localStorage.removeItem("user");
 
@@ -62,85 +70,210 @@ export const UserProvider = ({ children }) => {
   };
 
   const handlegooglesignin = async () => {
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const firebaseuser = result.user;
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const firebaseuser = result.user;
 
-    const payload = {
-      email: firebaseuser.email,
-      name: firebaseuser.displayName,
-      image: firebaseuser.photoURL || "https://github.com/shadcn.png",
-    };
+      const payload = {
+        email: firebaseuser.email,
+        name: firebaseuser.displayName,
+        image: firebaseuser.photoURL || "https://github.com/shadcn.png",
+      };
 
-    const response = await axiosInstance.post("/user/login", payload);
+      const response = await axiosInstance.post("/user/login", payload);
 
-    if (response.data.requiresOtp) {
-      setOtpUserId(response.data.userId);
-      setOtpRequired(true);
+      if (response.data.requiresOtp) {
+        setOtpUserId(response.data.userId);
+        setOtpRequired(true);
+        return { success: true, requiresOtp: true };
+      }
 
-      console.log("OTP required for user:", response.data.userId);
+      if (response.data.result) {
+        login(response.data.result);
+        return { success: true, result: response.data.result };
+      }
+    } catch (error) {
+      if (error?.code === "auth/cancelled-popup-request" || error?.code === "auth/popup-closed-by-user") {
+        console.log("Google login popup was closed.");
+        return { success: false, message: "Google sign-in was cancelled" };
+      }
 
-      return;
+      console.error("Google sign in error:", error);
+      return { success: false, message: error.message };
     }
+  };
 
-    if (response.data.result) {
-      login(response.data.result);
+  const handlegithubsignin = async () => {
+    try {
+      const result = await signInWithPopup(auth, githubProvider);
+      const firebaseuser = result.user;
+
+      const payload = {
+        email: firebaseuser.email || `${firebaseuser.uid}@github.com`,
+        name: firebaseuser.displayName || firebaseuser.reloadUserInfo?.screenName || "GitHub User",
+        image: firebaseuser.photoURL || "https://github.com/shadcn.png",
+      };
+
+      const response = await axiosInstance.post("/user/login", payload);
+
+      if (response.data.requiresOtp) {
+        setOtpUserId(response.data.userId);
+        setOtpRequired(true);
+        return { success: true, requiresOtp: true };
+      }
+
+      if (response.data.result) {
+        login(response.data.result);
+        return { success: true, result: response.data.result };
+      }
+    } catch (error) {
+      if (error?.code === "auth/cancelled-popup-request" || error?.code === "auth/popup-closed-by-user") {
+        console.log("GitHub login popup was closed.");
+        return { success: false, message: "GitHub sign-in was cancelled" };
+      }
+
+      console.error("GitHub sign in error:", error);
+      return { success: false, message: error.message };
     }
-  } catch (error) {
-    if (error?.code === "auth/cancelled-popup-request") {
-      console.log("Google login popup was cancelled. Please try again.");
-      return;
+  };
+
+  const sendLoginOtp = async (username, password) => {
+    try {
+      const response = await axiosInstance.post("/user/send-login-otp", {
+        username: username.trim(),
+        password,
+      });
+
+      if (response.data?.userId) {
+        setOtpUserId(response.data.userId);
+      }
+      if (response.data?.emailHint) {
+        setOtpEmailHint(response.data.emailHint);
+      }
+
+      return {
+        success: true,
+        message: response.data?.message,
+        emailHint: response.data?.emailHint,
+        devOtp: response.data?.devOtp,
+        userId: response.data?.userId,
+      };
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to send OTP to email";
+      return { success: false, message };
     }
+  };
 
-    console.error("Google sign in error:", error);
-  }
-};
+  const loginWithUsernameOtp = async ({ username, password, otp }) => {
+    try {
+      const response = await axiosInstance.post("/user/login", {
+        username: username.trim(),
+        password,
+        otp: otp ? String(otp).trim() : undefined,
+      });
 
- const verifyOTP = async (otp) => {
-  try {
-    if (!otpUserId) {
-      console.error("OTP User ID missing");
+      if (response.data?.result) {
+        login(response.data.result);
+        setOtpRequired(false);
+        setOtpUserId(null);
+        return { success: true, result: response.data.result };
+      }
+
+      if (response.data?.requiresOtp) {
+        setOtpUserId(response.data.userId);
+        setOtpRequired(true);
+        if (response.data.emailHint) {
+          setOtpEmailHint(response.data.emailHint);
+        }
+        return {
+          success: true,
+          requiresOtp: true,
+          message: response.data.message,
+          emailHint: response.data.emailHint,
+          devOtp: response.data.devOtp,
+        };
+      }
+
+      return {
+        success: false,
+        message: response.data?.message || "Login failed",
+      };
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "An unexpected error occurred during login";
+      return { success: false, message };
+    }
+  };
+
+  const signupNewUser = async ({ username, email, password }) => {
+    try {
+      const response = await axiosInstance.post("/user/signup", {
+        username: username.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      if (response.data?.result) {
+        login(response.data.result);
+        return { success: true, result: response.data.result };
+      }
+
+      return {
+        success: false,
+        message: response.data?.message || "Signup failed",
+      };
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "An unexpected error occurred during signup";
+      return { success: false, message };
+    }
+  };
+
+  const verifyOTP = async (otp) => {
+    try {
+      if (!otpUserId) {
+        console.error("OTP User ID missing");
+        return false;
+      }
+
+      const enteredOTP = String(otp).trim();
+
+      if (enteredOTP.length !== 6) {
+        console.error("OTP must be 6 digits");
+        return false;
+      }
+
+      const response = await axiosInstance.post("/user/verify-otp", {
+        userId: otpUserId,
+        otp: enteredOTP,
+      });
+
+      if (response.data?.result) {
+        login(response.data.result);
+        setOtpRequired(false);
+        setOtpUserId(null);
+        setOtpEmailHint("");
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error(
+        "OTP verification failed:",
+        error.response?.status,
+        error.response?.data?.message || error.message
+      );
       return false;
     }
+  };
 
-    const enteredOTP = String(otp).trim();
-
-    if (enteredOTP.length !== 6) {
-      console.error("OTP must be 6 digits");
-      return false;
-    }
-
-    console.log("Sending OTP verification:");
-    console.log("User ID:", otpUserId);
-    console.log("OTP:", enteredOTP);
-
-    const response = await axiosInstance.post("/user/verify-otp", {
-      userId: otpUserId,
-      otp: enteredOTP,
-    });
-
-    console.log("OTP response:", response.data);
-
-    if (response.data?.result) {
-      login(response.data.result);
-
-      setOtpRequired(false);
-      setOtpUserId(null);
-
-      return true;
-    }
-
-    return false;
-  } catch (error) {
-    console.error(
-      "OTP verification failed:",
-      error.response?.status,
-      error.response?.data?.message || error.message
-    );
-
-    return false;
-  }
-};
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseuser) => {
       console.log(
@@ -153,9 +286,16 @@ export const UserProvider = ({ children }) => {
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
-
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
+  };
+
+  const loginWithPassword = async (email, password) => {
+    return loginWithUsernameOtp({ username: email, password });
+  };
+
+  const signupWithPassword = async ({ name, email, password }) => {
+    return signupNewUser({ username: name, email, password });
   };
 
   return (
@@ -165,9 +305,17 @@ export const UserProvider = ({ children }) => {
         login,
         logout,
         handlegooglesignin,
+        handlegithubsignin,
+        sendLoginOtp,
+        loginWithUsernameOtp,
+        signupNewUser,
+        loginWithPassword,
+        signupWithPassword,
 
         otpRequired,
         otpUserId,
+        otpEmailHint,
+        setOtpRequired,
         verifyOTP,
 
         theme,

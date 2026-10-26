@@ -19,29 +19,40 @@ const Sidebar = () => {
 
   const [isdialogeopen, setisdialogeopen] = useState(false);
   return (
-    <aside className="w-64 bg-white dark:bg-gray-950 light:text-black dark:text-white border-r min-h-screen p-2">
+    <aside className="w-64 bg-white dark:bg-black text-black dark:text-white border-r border-gray-200 dark:border-neutral-800 min-h-screen p-2">
       <nav className="space-y-1">
         <Link href="/">
-          <Button variant="ghost" 
-          className="w-full justify-start light:text-black dark:text-white">
+          <Button
+            variant="ghost" 
+            className="w-full justify-start text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+          >
             <Home className="w-5 h-5 mr-3" />
             Home
           </Button>
         </Link>
         <Link href="/explore">
-          <Button variant="ghost" className="w-full justify-start light:text-black dark:text-white">
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+          >
             <Compass className="w-5 h-5 mr-3" />
             Explore
           </Button>
         </Link>
-           <Link href="/watch-party">
-          <Button variant="ghost" className="w-full justify-start light:text-black dark:text-white">
+        <Link href="/watch-party">
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+          >
             <FilmIcon className="w-5 h-5 mr-3" />
             Watch-Party
           </Button>
         </Link>
         <Link href="/subscription">
-          <Button variant="ghost" className="w-full justify-start light:text-black dark:text-white">
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+          >
             <PlaySquare className="w-5 h-5 mr-3" />
             Subscription
           </Button>
@@ -49,28 +60,40 @@ const Sidebar = () => {
 
         {user && (
           <>
-            <div className="border-t pt-2 mt-2">
+            <div className="border-t border-gray-200 dark:border-neutral-800 pt-2 mt-2">
               <Link href="/history">
-                <Button variant="ghost" className="w-full justify-start light:text-black dark:text-white">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+                >
                   <History className="w-5 h-5 mr-3" />
                   History
                 </Button>
               </Link>
               <Link href="/liked">
-                <Button variant="ghost" className="w-full justify-start light:text-black dark:text-whitet">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+                >
                   <ThumbsUp className="w-5 h-5 mr-3" />
                   Liked videos
                 </Button>
               </Link>
               <Link href="/watch-later">
-                <Button variant="ghost" className="ww-full justify-start light:text-black dark:text-white">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+                >
                   <Clock className="w-5 h-5 mr-3" />
                   Watch later
                 </Button>
               </Link>
               {user?.channelname ? (
                 <Link href={`/channel/${user.id}`}>
-                  <Button variant="ghost" className="w-full justify-start light:text-black dark:text-white">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-black dark:text-white hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+                  >
                     <User className="w-5 h-5 mr-3" />
                     Your channel
                   </Button>
@@ -80,7 +103,7 @@ const Sidebar = () => {
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="w-full light:text-black dark:text-white"
+                    className="w-full bg-gray-100 dark:bg-neutral-800 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-neutral-700 cursor-pointer"
                     onClick={() => setisdialogeopen(true)}
                   >
                     Create Channel

@@ -3,43 +3,17 @@ import Sidebar from "@/components/Sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import type { AppProps } from "next/app";
 import { useEffect, useState } from "react";
-import { UserProvider } from "../lib/AuthContext";
+import { UserProvider, useUser } from "../lib/AuthContext";
 import "../styles/globals.css";
 
 function AppContent({ Component, pageProps, router }: AppProps) {
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
-
-  useEffect(() => {
-    const currentHour = new Date().getHours();
-    const currentMinutes = new Date().getMinutes();
-    const currentTime = currentHour * 60 + currentMinutes;
-
-    const startTime = 10 * 60;
-    const endTime = 12 * 60;
-
-    const savedTheme = localStorage.getItem("theme");
-
-    if (savedTheme === "light" || savedTheme === "dark") {
-      setTheme(savedTheme);
-    } else if (currentTime >= startTime && currentTime <= endTime) {
-      setTheme("light");
-    } else {
-      setTheme("dark");
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-  };
+  const { theme, toggleTheme } = useUser();
 
   return (
     <div
       className={
         theme === "dark"
-          ? " dark min-h-screen bg-black text-white"
+          ? "dark min-h-screen bg-black text-white"
           : "min-h-screen bg-white text-black"
       }
     >
@@ -56,9 +30,10 @@ function AppContent({ Component, pageProps, router }: AppProps) {
 
       <button
         onClick={toggleTheme}
-        className="fixed bottom-5 right-5 z-50 rounded-full bg-orange-500 px-4 py-2 text-white shadow-lg"
+        className="fixed bottom-5 right-5 z-50 rounded-full bg-orange-500 px-4 py-2 text-white shadow-lg font-medium hover:bg-orange-600 transition-colors flex items-center gap-1.5 cursor-pointer"
+        title={`Switch to ${theme === "light" ? "Dark" : "Light"} Mode`}
       >
-        {theme === "light" ? "Dark" : "Light"}
+        <span>{theme === "light" ? "🌙 Dark" : "☀️ Light"}</span>
       </button>
     </div>
   );

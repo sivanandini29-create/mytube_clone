@@ -183,20 +183,24 @@ const Comments = ({ videoId }: any) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">{comments.length} Comments</h2>
+      <h2 className="text-xl font-bold text-black dark:text-white">
+        {comments.length} Comments
+      </h2>
 
       {user && (
         <div className="flex gap-4">
-          <Avatar className="w-10 h-10">
+          <Avatar className="w-10 h-10 border border-gray-200 dark:border-neutral-800">
             <AvatarImage src={user.image || ""} />
-            <AvatarFallback>{user.name?.[0] || "U"}</AvatarFallback>
+            <AvatarFallback className="bg-neutral-800 text-white font-medium">
+              {user.name?.[0] || "U"}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-2">
             <Textarea
               placeholder="Add a comment..."
               value={newComment}
               onChange={(e: any) => setNewComment(e.target.value)}
-              className="min-h-[80px] resize-none border-0 border-b-2 rounded-none focus-visible:ring-0"
+              className="min-h-[80px] resize-none border-0 border-b-2 border-gray-300 dark:border-neutral-700 rounded-none focus-visible:ring-0 bg-transparent text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-black dark:focus:border-white"
             />
 
             {errorMessage && (
@@ -208,12 +212,14 @@ const Comments = ({ videoId }: any) => {
                 variant="ghost"
                 onClick={() => setNewComment("")}
                 disabled={!newComment.trim()}
+                className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSubmitComment}
                 disabled={!newComment.trim() || isSubmitting}
+                className="bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 rounded-full font-medium cursor-pointer"
               >
                 Comment
               </Button>
@@ -223,21 +229,23 @@ const Comments = ({ videoId }: any) => {
       )}
       <div className="space-y-4">
         {comments.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">
+          <p className="text-sm text-gray-500 dark:text-gray-400 italic">
             No comments yet. Be the first to comment!
           </p>
         ) : (
           comments.map((comment) => (
             <div key={comment._id} className="flex gap-4">
-              <Avatar className="w-10 h-10">
-                <AvatarFallback>{comment.usercommented[0]}</AvatarFallback>
+              <Avatar className="w-10 h-10 border border-gray-200 dark:border-neutral-800">
+                <AvatarFallback className="bg-neutral-800 text-white font-medium">
+                  {comment.usercommented?.[0] || "U"}
+                </AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-sm">
+                  <span className="font-semibold text-sm text-black dark:text-white">
                     {comment.usercommented}
                   </span>
-                  <span className="text-xs text-gray-600">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     {formatDistanceToNow(new Date(comment.commentedon))} ago
                   </span>
                 </div>
@@ -247,11 +255,13 @@ const Comments = ({ videoId }: any) => {
                     <Textarea
                       value={editText}
                       onChange={(e) => setEditText(e.target.value)}
+                      className="text-black dark:text-white bg-transparent border-gray-300 dark:border-neutral-700"
                     />
                     <div className="flex gap-2 justify-end">
                       <Button
                         onClick={handleUpdateComment}
                         disabled={!editText.trim()}
+                        className="bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 rounded-full font-medium cursor-pointer"
                       >
                         Save
                       </Button>
@@ -261,6 +271,7 @@ const Comments = ({ videoId }: any) => {
                           setEditingCommentId(null);
                           setEditText("");
                         }}
+                        className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
                       >
                         Cancel
                       </Button>
@@ -268,30 +279,38 @@ const Comments = ({ videoId }: any) => {
                   </div>
                 ) : (
                   <>
-                    <p className="text-sm">{comment.commentbody}</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-200 mt-1">
+                      {comment.commentbody}
+                    </p>
 
                     <div className="flex items-center gap-4 mt-2 text-sm">
                       <button
                         onClick={() => handleLike(comment._id)}
-                        className="text-blue-600 hover:underline"
+                        className="text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer"
                       >
-                        Like ({comment.likes.length || 0})
+                        Like ({comment.likes?.length || 0})
                       </button>
                       <button
                         onClick={() => handleDislike(comment._id)}
-                        className="text-red-600 hover:underline"
+                        className="text-red-600 dark:text-red-400 hover:underline font-medium cursor-pointer"
                       >
                         Dislike ({comment.dislikes?.length || 0})
                       </button>
                     </div>
 
                     {comment.userid === user?._id ? (
-                      <div className="flex gap-2 mt-2 text-sm text-gray-500">
-                        <button onClick={() => handleEdit(comment)}>
+                      <div className="flex gap-3 mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        <button
+                          onClick={() => handleEdit(comment)}
+                          className="hover:text-black dark:hover:text-white cursor-pointer"
+                        >
                           Edit
                         </button>
 
-                        <button onClick={() => handleDelete(comment._id)}>
+                        <button
+                          onClick={() => handleDelete(comment._id)}
+                          className="hover:text-red-600 dark:hover:text-red-400 cursor-pointer"
+                        >
                           Delete
                         </button>
                       </div>
@@ -299,7 +318,7 @@ const Comments = ({ videoId }: any) => {
                       <div className="flex gap-2 mt-2 text-sm text-gray-500">
                         <button
                           onClick={() => handleReport(comment._id)}
-                          className="text-red-600 hover:underline"
+                          className="text-red-600 dark:text-red-400 hover:underline cursor-pointer"
                         >
                           Report
                         </button>
