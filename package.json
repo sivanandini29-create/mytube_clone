@@ -1,4 +1,10 @@
 {
+  "name": "youtube-clone",
+  "version": "1.0.0",
+  "scripts": {
+    "server": "npm --prefix server start",
+    "client": "npm --prefix yourtube run dev"
+  },
   "dependencies": {
     "date-fns": "^4.4.0"
   }

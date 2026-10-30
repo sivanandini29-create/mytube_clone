@@ -38,3 +38,25 @@ export const getallhistoryVideo = async (req, res) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+export const deletehistory = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await history.findByIdAndDelete(id);
+    return res.status(200).json({ message: "Removed from history", success: true });
+  } catch (error) {
+    console.error("deletehistory error:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const clearallhistory = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    await history.deleteMany({ viewer: userId });
+    return res.status(200).json({ message: "Watch history cleared", success: true });
+  } catch (error) {
+    console.error("clearallhistory error:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};

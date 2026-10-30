@@ -231,13 +231,20 @@ io.on("connection", (socket) => {
 });
 const DBURL = process.env.DB_URL;
 
+if (!DBURL) {
+  console.error("WARNING: DB_URL is not set in environment variables!");
+}
+
 mongoose
-  .connect(DBURL)
+  .connect(DBURL, {
+    serverSelectionTimeoutMS: 15000,
+  })
   .then(() => {
-    console.log("Mongodb connected");
+    console.log("MongoDB connected successfully");
   })
   .catch((error) => {
-    console.log(error);
+    console.error("MongoDB connection failed:", error.message);
+    console.error("Make sure your current IP address is whitelisted in MongoDB Atlas (Network Access -> Add IP Address -> Allow Access From Anywhere).");
   });
 
 const PORT = process.env.PORT || 5000;
@@ -246,4 +253,12 @@ httpServer.listen(PORT, () => {
   console.log(`server running on port ${PORT}`);
 
   console.log(`Watch Party Socket.IO running on port ${PORT}`);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.warn("[SERVER] Handled unhandledRejection:", reason?.message || reason);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("[SERVER] Handled uncaughtException:", error?.message || error);
 });

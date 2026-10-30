@@ -20,7 +20,7 @@ export default function VideoCard({ video, canDelete, onDelete }: any) {
         <div className="space-y-3">
           <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
             <video
-              src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${video?.filepath}`}
+              src={`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"}/${video?.filepath}`}
               className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
             />
             <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1 rounded">

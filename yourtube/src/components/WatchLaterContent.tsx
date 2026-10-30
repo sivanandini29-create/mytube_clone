@@ -45,10 +45,11 @@ export default function WatchLaterContent() {
   }
   const handleRemoveFromWatchLater = async (watchLaterId: string) => {
     try {
-      console.log("Removing from history:", watchLaterId);
-      setWatchLater(watchLater.filter((item) => item._id !== watchLaterId));
+      await axiosInstance.delete(`/watch/${watchLaterId}`);
+      setWatchLater((prev) => prev.filter((item) => item._id !== watchLaterId));
     } catch (error) {
-      console.error("Error removing from history:", error);
+      console.error("Error removing from watch later:", error);
+      alert("Failed to remove video from Watch Later");
     }
   };
 

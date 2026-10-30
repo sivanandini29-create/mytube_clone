@@ -15,6 +15,38 @@ const reportschema = mongoose.Schema({
   },
 });
 
+const replySchema = mongoose.Schema({
+  userid: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    required: true,
+  },
+  usercommented: {
+    type: String,
+    required: true,
+  },
+  commentbody: {
+    type: String,
+    required: true,
+  },
+  commentedon: {
+    type: Date,
+    default: Date.now,
+  },
+  likes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+    },
+  ],
+  dislikes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+    },
+  ],
+});
+
 const commentschema = mongoose.Schema(
   {
     userid: {
@@ -66,6 +98,8 @@ const commentschema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    replies: [replySchema],
 
     commentedon: {
       type: Date,

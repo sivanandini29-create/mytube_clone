@@ -37,3 +37,14 @@ export const getallwatchlater = async (req, res) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+export const deletewatchlater = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await watchlater.findByIdAndDelete(id);
+    return res.status(200).json({ message: "Removed from watch later", success: true });
+  } catch (error) {
+    console.error("deletewatchlater error:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};

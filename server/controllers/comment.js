@@ -167,8 +167,9 @@ export const reportComment = async (req, res) => {
       });
     }
 
-    const alreadyReported = existingComment.reportscomments.some(
-      (report) => report.userrId.toString() === userId,
+    const reportsList = existingComment.reports || [];
+    const alreadyReported = reportsList.some(
+      (report) => String(report.userrId) === String(userId),
     );
     if (alreadyReported) {
       return res.status(400).json({
@@ -178,7 +179,7 @@ export const reportComment = async (req, res) => {
 
     existingComment.reports.push({
       userrId: userId,
-      reason: reason || "inappropirate content",
+      reason: reason || "inappropriate content",
     });
     existingComment.isflagged = true;
     await existingComment.save();
@@ -190,5 +191,88 @@ export const reportComment = async (req, res) => {
     return res.status(500).json({
       message: "something went wrong",
     });
+  }
+};
+
+export const postReply = async (req, res) => {
+  const { commentId } = req.params;
+  const { userid, usercommented, commentbody } = req.body;
+
+  if (!commentbody || !commentbody.trim()) {
+    return res.status(400).json({ message: "Reply text is required" });
+  }
+
+  const replyText = commentbody.toLowerCase();
+  const hasBadWord = badWords.some((word) => replyText.includes(word));
+  if (hasBadWord) {
+    return res.status(400).json({
+      message: "Reply contains inappropriate language",
+    });
+  }
+
+  try {
+    const parentComment = await comment.findById(commentId);
+    if (!parentComment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    const newReply = {
+      userid,
+      usercommented: usercommented || "Anonymous",
+      commentbody: commentbody.trim(),
+      commentedon: new Date(),
+      likes: [],
+      dislikes: [],
+    };
+
+    if (!parentComment.replies) {
+      parentComment.replies = [];
+    }
+
+    parentComment.replies.push(newReply);
+    await parentComment.save();
+
+    const createdReply = parentComment.replies[parentComment.replies.length - 1];
+    return res.status(201).json({
+      success: true,
+      reply: createdReply,
+      comment: parentComment,
+    });
+  } catch (error) {
+    console.error("postReply error:", error);
+    return res.status(500).json({ message: "Failed to post reply" });
+  }
+};
+
+export const deleteReply = async (req, res) => {
+  const { commentId, replyId } = req.params;
+  const { userId } = req.body || {};
+
+  try {
+    const parentComment = await comment.findById(commentId);
+    if (!parentComment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    const reply = parentComment.replies.id(replyId);
+    if (!reply) {
+      return res.status(404).json({ message: "Reply not found" });
+    }
+
+    if (userId && String(reply.userid) !== String(userId)) {
+      return res.status(403).json({ message: "Not authorized to delete this reply" });
+    }
+
+    parentComment.replies.pull(replyId);
+    await parentComment.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Reply deleted successfully",
+      comment: parentComment,
+    });
+  } catch (error) {
+    console.error("deleteReply error:", error);
+    return res.status(500).json({ message: "Failed to delete reply" });
   }
 };

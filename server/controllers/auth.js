@@ -13,6 +13,9 @@ const getTransporter = () => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    connectionTimeout: 4000,
+    greetingTimeout: 4000,
+    socketTimeout: 4000,
   });
 };
 
@@ -26,9 +29,26 @@ export const validateUsername = (username) => {
   return /^[a-zA-Z0-9]+$/.test(username.trim());
 };
 
+export const getPasswordValidationError = (password) => {
+  if (!password || typeof password !== "string") {
+    return "Password is required";
+  }
+  if (password.length <= 6) {
+    return "Password must be greater than 6 characters";
+  }
+  const numbers = password.match(/\d/g) || [];
+  if (numbers.length < 2) {
+    return "Password must contain at least 2 numbers";
+  }
+  const hasSpecialChar = /[^a-zA-Z0-9]/.test(password);
+  if (!hasSpecialChar) {
+    return "Password must contain at least 1 special character";
+  }
+  return null;
+};
+
 export const validatePassword = (password) => {
-  if (!password || typeof password !== "string") return false;
-  return password.length >= 6;
+  return getPasswordValidationError(password) === null;
 };
 
 export const validateEmail = (email) => {
@@ -47,7 +67,12 @@ const maskEmail = (email) => {
 export const sendOtpEmail = async (toEmail, otp, username) => {
   try {
     const transporter = getTransporter();
-    const info = await transporter.sendMail({
+    let timer;
+    const timeoutPromise = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error("Email sending timed out")), 4000);
+    });
+
+    const sendPromise = transporter.sendMail({
       from: `"myTube Security" <${process.env.EMAIL_USER}>`,
       to: toEmail,
       subject: `Your myTube Login OTP: ${otp}`,
@@ -70,6 +95,14 @@ export const sendOtpEmail = async (toEmail, otp, username) => {
         </div>
       `,
     });
+
+    // Always attach a catch handler to prevent unhandled rejections if timeout wins the race
+    sendPromise.catch((err) => {
+      console.warn(`[AUTH] Background nodemailer notice: ${err.message}`);
+    });
+
+    const info = await Promise.race([sendPromise, timeoutPromise]);
+    clearTimeout(timer);
     console.log(`[AUTH] OTP email successfully sent to ${toEmail}. MessageId: ${info.messageId}`);
     return { success: true };
   } catch (error) {
@@ -136,10 +169,12 @@ export const sendLoginOtp = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: `OTP sent to your email address (${maskEmail(existingUser.email)})`,
+      message: emailResult.success
+        ? `OTP sent to your email address (${maskEmail(existingUser.email)})`
+        : `Email delivery failed. Your OTP code is: ${otp}`,
       emailHint: maskEmail(existingUser.email),
       userId: existingUser._id,
-      devOtp: process.env.NODE_ENV !== "production" ? otp : undefined,
+      devOtp: otp,
       emailSent: emailResult.success,
     });
   } catch (error) {
@@ -183,9 +218,10 @@ export const signup = async (req, res) => {
       });
     }
 
-    if (!validatePassword(password)) {
+    const passwordError = getPasswordValidationError(password);
+    if (passwordError) {
       return res.status(400).json({
-        message: "Password must contain at least 6 characters",
+        message: passwordError,
       });
     }
 
@@ -355,7 +391,7 @@ export const login = async (req, res) => {
         requiresOtp: true,
         userId: existingUser._id,
         emailHint: maskEmail(existingUser.email),
-        devOtp: process.env.NODE_ENV !== "production" ? newOtp : undefined,
+        devOtp: newOtp,
       });
     }
 

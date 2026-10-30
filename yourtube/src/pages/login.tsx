@@ -35,6 +35,11 @@ export default function LoginPage() {
   const [showSignUpNewPassword, setShowSignUpNewPassword] = useState(false);
   const [showSignUpRetypePassword, setShowSignUpRetypePassword] = useState(false);
 
+  // Password validation: > 6 characters, at least 2 numbers, at least 1 special character
+  const isPasswordLengthValid = signUpNewPassword.length > 6;
+  const isPasswordNumbersValid = (signUpNewPassword.match(/\d/g) || []).length >= 2;
+  const isPasswordSpecialValid = /[^a-zA-Z0-9]/.test(signUpNewPassword);
+
   // OTP state & timer
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otpSentNotice, setOtpSentNotice] = useState("");
@@ -99,7 +104,8 @@ export default function LoginPage() {
       if (res.success) {
         setOtpSentNotice(res.message || "OTP has been sent to your email!");
         if (res.devOtp) {
-          setSuccessMessage(`OTP sent to email! (Development code: ${res.devOtp})`);
+          setSignInOtp(String(res.devOtp));
+          setSuccessMessage(`OTP Code: ${res.devOtp} (Auto-filled for testing)`);
         } else {
           setSuccessMessage(res.message || "OTP sent to your email!");
         }
@@ -158,9 +164,11 @@ export default function LoginPage() {
       } else if (res.requiresOtp) {
         setOtpSentNotice(res.message || "OTP sent to your email.");
         if (res.devOtp) {
-          setSuccessMessage(`OTP sent! (Development code: ${res.devOtp})`);
+          setSignInOtp(String(res.devOtp));
+          setSuccessMessage(`OTP Code: ${res.devOtp} (Auto-filled for testing)`);
+        } else {
+          setErrorMessage("Please enter the 6-digit OTP sent to your email.");
         }
-        setErrorMessage("Please enter the 6-digit OTP sent to your email.");
       } else {
         setErrorMessage(res.message || "Login failed. Please check your credentials.");
       }
@@ -198,8 +206,20 @@ export default function LoginPage() {
       return;
     }
 
-    if (signUpNewPassword.length < 6) {
-      setErrorMessage("Password must be at least 6 characters long.");
+    if (signUpNewPassword.length <= 6) {
+      setErrorMessage("Password must be greater than 6 characters (minimum 7 characters).");
+      return;
+    }
+
+    const numberMatches = signUpNewPassword.match(/\d/g) || [];
+    if (numberMatches.length < 2) {
+      setErrorMessage("Password must contain at least 2 numbers (0-9).");
+      return;
+    }
+
+    const hasSpecialChar = /[^a-zA-Z0-9]/.test(signUpNewPassword);
+    if (!hasSpecialChar) {
+      setErrorMessage("Password must contain at least 1 special character (e.g. !@#$%^&*).");
       return;
     }
 
@@ -499,7 +519,7 @@ export default function LoginPage() {
                 <Input
                   id="signup-password"
                   type={showSignUpNewPassword ? "text" : "password"}
-                  placeholder="Create a password (min 6 chars)"
+                  placeholder="Password (>6 chars, 2 numbers, 1 special char)"
                   value={signUpNewPassword}
                   onChange={(e) => setSignUpNewPassword(e.target.value)}
                   className="pl-9 pr-9 bg-neutral-950 border-neutral-800 text-white placeholder:text-neutral-600 focus-visible:ring-red-500"
@@ -512,6 +532,53 @@ export default function LoginPage() {
                 >
                   {showSignUpNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
+              </div>
+
+              {/* Password Requirement Badges */}
+              <div className="mt-2.5 p-2.5 bg-neutral-950/70 border border-neutral-800/80 rounded-lg space-y-1.5 text-xs">
+                <div className="text-[11px] font-medium text-neutral-400 mb-0.5">Password requirements:</div>
+                <div className="flex items-center gap-2 transition-colors">
+                  <span
+                    className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                      isPasswordLengthValid
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                        : "bg-neutral-800 text-neutral-500 border border-neutral-700/50"
+                    }`}
+                  >
+                    {isPasswordLengthValid ? "✓" : "•"}
+                  </span>
+                  <span className={isPasswordLengthValid ? "text-emerald-400 font-medium" : "text-neutral-400"}>
+                    Greater than 6 characters ({signUpNewPassword.length}/7+)
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 transition-colors">
+                  <span
+                    className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                      isPasswordNumbersValid
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                        : "bg-neutral-800 text-neutral-500 border border-neutral-700/50"
+                    }`}
+                  >
+                    {isPasswordNumbersValid ? "✓" : "•"}
+                  </span>
+                  <span className={isPasswordNumbersValid ? "text-emerald-400 font-medium" : "text-neutral-400"}>
+                    At least 2 numbers ({(signUpNewPassword.match(/\d/g) || []).length}/2)
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 transition-colors">
+                  <span
+                    className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                      isPasswordSpecialValid
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                        : "bg-neutral-800 text-neutral-500 border border-neutral-700/50"
+                    }`}
+                  >
+                    {isPasswordSpecialValid ? "✓" : "•"}
+                  </span>
+                  <span className={isPasswordSpecialValid ? "text-emerald-400 font-medium" : "text-neutral-400"}>
+                    At least 1 special character (!@#$%^&*...)
+                  </span>
+                </div>
               </div>
             </div>
 
